@@ -284,7 +284,7 @@ export default function Page() {
       <div className="shell">
         <header className="topbar"><button className="menu-button" onClick={() => setMobileNav(true)} aria-label="Abrir menú"><Menu size={20} /></button><div className="crumb">LUBRICALC <span>/</span> CALCULADORAS</div><div className="top-actions"><a className="widman-link" href="https://www.widman.biz" target="_blank" rel="noreferrer">Visitar Widman.biz <ArrowRight size={16} /></a></div></header>
         <div className="content">
-          <section className="hero"><div><h1>Decisiones técnicas,<br /><em>con más precisión.</em></h1><p>Calculadoras de lubricación y mantenimiento para transformar datos de planta en acciones confiables.</p><div className="hero-actions"><button className="primary-button" onClick={() => document.getElementById('catalogo')?.scrollIntoView({ behavior: 'smooth' })}>Explorar calculadoras <ArrowRight size={16} /></button><button className="quiet-button" onClick={() => setGuide(true)}><BookOpen size={16} /> Ver guía rápida</button></div></div><div className="hero-orbit"><div className="orbit-ring ring-one" /><div className="orbit-ring ring-two" /><div className="hero-gauge"><span>PRECISIÓN</span><strong>98.4</strong><small>% confianza operativa</small></div><div className="orbit-dot dot-one" /><div className="orbit-dot dot-two" /></div></section>
+          <section className="hero"><div><h1>Decisiones técnicas,<br /><em>con más precisión.</em></h1><p>Calculadoras de lubricación y mantenimiento para transformar datos de planta en acciones confiables.</p><div className="hero-actions"><button className="primary-button" onClick={() => document.getElementById('catalogo')?.scrollIntoView({ behavior: 'smooth' })}>Explorar calculadoras <ArrowRight size={16} /></button><button className="quiet-button" onClick={() => setGuide(true)}><BookOpen size={16} /> Ver guía rápida</button></div></div></section>
           <ViscosityPlot />
           <section className="metrics"><div><span>HERRAMIENTAS DISPONIBLES</span><strong>28</strong><small>cálculos especializados</small></div><div><span>ÁREAS DE APLICACIÓN</span><strong>07</strong><small>disciplinas de mantenimiento</small></div><div><span>ESTÁNDARES REFERENCIADOS</span><strong>17</strong><small>ASTM · ISO · API · AGMA · DIN · SKF</small></div><div><span>CANTIDAD DE VISITAS</span><strong>1250</strong><small>visitas a la fecha</small></div></section>
           <section className="section-head"><div><div className="section-kicker">ACCESO RÁPIDO</div><h2>Calculadoras destacadas</h2></div><button className="text-button" onClick={() => document.getElementById('catalogo')?.scrollIntoView({ behavior: 'smooth' })}>Ver catálogo completo <ArrowRight size={15} /></button></section>
@@ -317,7 +317,7 @@ function viscosityAtTemperature(v40: number, v100: number, temperature: number) 
 
 function ViscosityPlot() {
   const [lubricants, setLubricants] = useState<Lubricant[]>([
-    { id: 1, name: 'Lubricante A', v40: '220', v100: '19.2' },
+    { id: 1, name: 'Lubricante A', v40: '220', v100: '14.2' },
     { id: 2, name: 'Lubricante B', v40: '150', v100: '16.1' },
   ])
   const [minTemp, setMinTemp] = useState('20')
