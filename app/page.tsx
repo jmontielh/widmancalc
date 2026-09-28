@@ -317,7 +317,7 @@ function viscosityAtTemperature(v40: number, v100: number, temperature: number) 
 
 function ViscosityPlot() {
   const [lubricants, setLubricants] = useState<Lubricant[]>([
-    { id: 1, name: 'Lubricante A', v40: '220', v100: '19.2' },
+    { id: 1, name: 'Lubricante A', v40: '220', v100: '14.2' },
     { id: 2, name: 'Lubricante B', v40: '150', v100: '16.1' },
   ])
   const [minTemp, setMinTemp] = useState('20')
