@@ -52,7 +52,7 @@ type CalcSpec = { basis: string; modelType: string; output: string; application:
 const calcSpec: Record<CalcId, CalcSpec> = {
   vi: { basis: 'ASTM D2270', modelType: 'Cálculo normalizado', output: 'Índice de viscosidad (adimensional)', application: 'Estabilidad térmica de lubricantes', specNote: 'El índice de viscosidad se obtiene con el procedimiento normalizado ASTM D2270, que compara el aceite frente a fluidos de referencia para cuantificar su estabilidad térmica.' },
   operational: { basis: 'ASTM D341 (Walther)', modelType: 'Interpolación normalizada', output: 'Viscosidad cinemática (cSt)', application: 'Aceites a temperatura de operación', specNote: 'Interpolación según ASTM D341 (ecuación de Walther), el modelo normalizado que describe la relación viscosidad–temperatura de los aceites minerales.' },
-  blend: { basis: 'ASTM D7152', modelType: 'Modelo logarítmico', output: 'Viscosidad (cSt) / proporción (%)', application: 'Formulación y mezcla de aceites', specNote: 'Modelo logarítmico de mezcla ASTM D7152 para estimar la viscosidad resultante al combinar dos aceites en una proporción dada.' },
+  blend: { basis: 'ASTM D7152-23', modelType: 'Blending Method (doble logaritmo)', output: 'Viscosidad (cSt) / proporción (% v/v)', application: 'Formulación y mezcla de aceites', specNote: 'Método de mezcla ASTM D7152-23 (ASTM Blending Method) para viscosidades de los componentes conocidas a una misma temperatura. Usa la transformación doble logarítmica W = log10(log10(Z)); no es un promedio aritmético ni la fórmula simplificada de Refutas. Base de fracción: volumen (% v/v). D7152 también describe los métodos Wright, que requieren viscosidades a dos temperaturas.' },
   oilBath: { basis: 'Experiencia Widman', modelType: 'Estimación geométrica', output: 'Volumen de aceite (L)', application: 'Cárteres y cajas de engranajes', specNote: 'Estimación geométrica basada en la experiencia de Widman para dimensionar el volumen de carga de cárteres y cajas de engranajes.' },
   dripPoint: { basis: 'ASTM D566 / D2265', modelType: 'Margen térmico', output: 'Margen al punto de goteo (°C)', application: 'Grasas lubricantes', specNote: 'Margen térmico sobre el punto de goteo ASTM D566 / D2265, que indica la temperatura a la que la grasa pierde su estructura.' },
   api: { basis: 'API MPMS 11.1 / ASTM D1250', modelType: 'Conversión normalizada', output: 'Grados API y densidad a 15.6 °C', application: 'Caracterización de fluidos', specNote: 'Conversión normalizada API MPMS 11.1 / ASTM D1250 entre densidad y grados API referidos a 15.6 °C.' },
@@ -81,7 +81,34 @@ const calcSpec: Record<CalcId, CalcSpec> = {
 }
 
 const defaults: Record<CalcId, Record<string, string>> = {
-  vi: { v40: '112', v100: '15.2' }, operational: { viscosity40: '68', viscosity100: '8.6', operating: '60' }, blend: { oilA: '220', oilB: '46', ratio: '60', target: '100', temperature: '40' }, oilBath: { length: '80', width: '60', height: '35', fill: '70' }, dripPoint: { drip: '190', operating: '145', safety: '15' }, api: { value: '30', unit: 'api' }, isoCst: { iso: '220' }, saybolt: { sus: '120' }, reducer: { lubrication: 'splash', reduction: 'simple', hp: '25', rpm: '1450' }, bearing: { od: '90', id: '45', width: '23', fill: '30' }, speedFactor: { dm: '67.5', rpm: '1800' }, greaseLife: { speed: '1800', temp: '70', load: '1' }, relube: { speed: '1800', dm: '67.5', temp: '65', vibration: '1.2', humidity: '45' }, lubricationRoute: { points: '24', minutes: '8', frequency: '12' }, hydraulic: { flow: '42', pressure: '160', efficiency: '85' }, pressureLoss: { flow: '42', diameter: '25', length: '18', viscosity: '46' }, oilTemp: { power: '8', ambient: '28', tank: '120', flow: '42' }, air: { displacement: '2400', displacementUnit: 'cc', rpm: '4000', engineType: 'gasolineElectronic' }, airLube: { flow: '850', ratio: '1' }, dewPoint: { air: '7', ambient: '24', pressure: '7' }, converter: { value: '100', from: 'cSt', to: 'cP', density: '0.86' }, lubeCost: { tankCapacity: '60', changesPerYear: '3', refillPerMonth: '5', oilPrice: '8.5', filterCost: '25', hoursPerChange: '1.5', laborRate: '15', disposalRate: '0.5', labCost: '120' }, assetCriticality: { impact: '4', frequency: '3', detection: '2' }, bearingLife: { dynamicLoad: '35', equivalentLoad: '8', rpm: '1800', reliability: '90', viscosityRatio: '1.2' }, chainSelection: { power: '15', rpm: '1750', drivenRpm: '350', serviceFactor: '1.3', centerDistance: '600' }, oilAnalysis: { viscosityChange: '8', water: '0.03', iron: '12', silicon: '8', hours: '500' }, greaseCoupling: { shaftDiameter: '80', couplingDiameter: '180', rpm: '1450', temperature: '70', factor: '1' }, oilCorrection: { measuredViscosity: '68', measuredTemp: '40', operatingTemp: '80', viscosityIndex: '95', density: '0.86' },
+  vi: { v40: '112', v100: '15.2' }, operational: { viscosity40: '68', viscosity100: '8.6', operating: '60' }, blend: { oilA: '220', oilB: '46', ratio: '60', target: '100', temperature: '40', batch: '' }, oilBath: { length: '80', width: '60', height: '35', fill: '70' }, dripPoint: { drip: '190', operating: '145', safety: '15' }, api: { value: '30', unit: 'api' }, isoCst: { iso: '220' }, saybolt: { sus: '120' }, reducer: { lubrication: 'splash', reduction: 'simple', hp: '25', rpm: '1450' }, bearing: { od: '90', id: '45', width: '23', fill: '30' }, speedFactor: { dm: '67.5', rpm: '1800' }, greaseLife: { speed: '1800', temp: '70', load: '1' }, relube: { speed: '1800', dm: '67.5', temp: '65', vibration: '1.2', humidity: '45' }, lubricationRoute: { points: '24', minutes: '8', frequency: '12' }, hydraulic: { flow: '42', pressure: '160', efficiency: '85' }, pressureLoss: { flow: '42', diameter: '25', length: '18', viscosity: '46' }, oilTemp: { power: '8', ambient: '28', tank: '120', flow: '42' }, air: { displacement: '2400', displacementUnit: 'cc', rpm: '4000', engineType: 'gasolineElectronic' }, airLube: { flow: '850', ratio: '1' }, dewPoint: { air: '7', ambient: '24', pressure: '7' }, converter: { value: '100', from: 'cSt', to: 'cP', density: '0.86' }, lubeCost: { tankCapacity: '60', changesPerYear: '3', refillPerMonth: '5', oilPrice: '8.5', filterCost: '25', hoursPerChange: '1.5', laborRate: '15', disposalRate: '0.5', labCost: '120' }, assetCriticality: { impact: '4', frequency: '3', detection: '2' }, bearingLife: { dynamicLoad: '35', equivalentLoad: '8', rpm: '1800', reliability: '90', viscosityRatio: '1.2' }, chainSelection: { power: '15', rpm: '1750', drivenRpm: '350', serviceFactor: '1.3', centerDistance: '600' }, oilAnalysis: { viscosityChange: '8', water: '0.03', iron: '12', silicon: '8', hours: '500' }, greaseCoupling: { shaftDiameter: '80', couplingDiameter: '180', rpm: '1450', temperature: '70', factor: '1' }, oilCorrection: { measuredViscosity: '68', measuredTemp: '40', operatingTemp: '80', viscosityIndex: '95', density: '0.86' },
+}
+
+// --- Modelo de mezcla ASTM D7152-23 (ASTM Blending Method, una sola temperatura) ---
+// Transformación doble logarítmica del estándar ASTM D341/D7152. nu en cSt (mm^2/s).
+// Z = nu + 0.7 + término de corrección; W = log10(log10(Z)). No es promedio aritmético.
+function transformViscosity(nu: number) {
+  const Z = nu + 0.7 + Math.exp(-1.47 - 1.84 * nu - 0.51 * nu * nu)
+  return Math.log10(Math.log10(Z)) // W
+}
+// Transformación inversa: recupera la viscosidad cinemática (cSt) a partir de W.
+function inverseTransform(W: number) {
+  const logZ = Math.pow(10, W)        // log10(Z)
+  const w = Math.pow(10, logZ) - 0.7  // Z - 0.7
+  return w - Math.exp(-0.7487 - 3.295 * w + 0.6119 * w * w - 0.3193 * w * w * w)
+}
+// Viscosidad de la mezcla dadas dos viscosidades y la fracción (0-1) del aceite 1.
+function calculateBlendViscosity(nu1: number, nu2: number, fraction1: number) {
+  const f1 = fraction1
+  const f2 = 1 - f1
+  return inverseTransform(f1 * transformViscosity(nu1) + f2 * transformViscosity(nu2))
+}
+// Fracción del aceite 1 para alcanzar una viscosidad objetivo. Devuelve null si no hay solución única.
+function calculateBlendFractions(nu1: number, nu2: number, target: number) {
+  const W1 = transformViscosity(nu1)
+  const W2 = transformViscosity(nu2)
+  if (Math.abs(W1 - W2) < 1e-12) return null
+  return (transformViscosity(target) - W2) / (W1 - W2)
 }
 
 function calculate(id: CalcId, values: Record<string, string>) {
@@ -89,7 +116,74 @@ function calculate(id: CalcId, values: Record<string, string>) {
   switch (id) {
     case 'vi': { const u = n('v40'); const y = n('v100'); const invalid = !Number.isFinite(u) || !Number.isFinite(y) || u <= 0 || y <= 0 || u <= y; if (invalid) return { value: 0, unit: 'VI', label: 'Datos no válidos para calcular', note: 'La viscosidad a 40 °C debe ser positiva y mayor que la viscosidad a 100 °C. Revise los valores ingresados.' }; const bands = [{ max: 3.8, a: 1.14673, b: 1.7576, c: -0.109, d: 0.84155, e: 1.5521, f: -0.077 }, { max: 4.4, a: 3.38095, b: -15.4952, c: 33.196, d: 0.78571, e: 1.7929, f: -0.183 }, { max: 5, a: 2.5, b: -7.2143, c: 13.812, d: 0.82143, e: 1.5679, f: 0.119 }, { max: 6.4, a: 0.101001, b: 16.635, c: -45.469, d: 0.049859, e: 9.1613, f: -18.557 }, { max: 7, a: 3.35714, b: -23.564, c: 378.466, d: 0.22619, e: 7.7369, f: -16.656 }, { max: 7.7, a: 0.011912, b: 1.475, c: -72.87, d: 0.79762, e: -0.7321, f: 14.61 }, { max: 9, a: 0.41858, b: 16.1558, c: -56.04, d: 0.05794, e: 10.5156, f: -28.24 }, { max: 12, a: 0.88797, b: 7.5527, c: -16.6, d: 0.26665, e: 6.7015, f: -10.81 }, { max: 15, a: 0.7672, b: 10.7972, c: -38.18, d: 0.20073, e: 8.4658, f: -22.49 }, { max: 18, a: 0.97305, b: 5.3135, c: -2.2, d: 0.28889, e: 5.9741, f: -4.93 }, { max: 22, a: 0.97256, b: 5.25, c: -0.98, d: 0.24504, e: 7.416, f: -16.73 }, { max: 28, a: 0.91413, b: 7.4759, c: -21.82, d: 0.20323, e: 9.1267, f: -34.23 }, { max: 40, a: 0.8703, b: 19.7157, c: -50.77, d: 0.18411, e: 10.1015, f: -46.75 }, { max: 55, a: 0.84703, b: 12.6752, c: -133.31, d: 0.17029, e: 11.4866, f: -80.62 }, { max: 70, a: 0.85921, b: 11.1009, c: -83.19, d: 0.1713, e: 11.368, f: -76.94 }, { max: Infinity, a: 0.8353, b: 14.673, c: -216, d: 0.1684, e: 11.8493, f: -96.947 }]; const band = bands.find((item) => y <= item.max); if (!band || y < 2) return { value: 0, unit: 'VI', label: 'Fuera del rango ASTM D2270', note: 'La norma no define el índice para viscosidades menores de 2 cSt a 100 °C.' }; const l = band.a * y ** 2 + band.b * y + band.c; const h = band.d * y ** 2 + band.e * y + band.f; if (!Number.isFinite(l) || !Number.isFinite(h) || l <= h) return { value: 0, unit: 'VI', label: 'Datos no válidos para calcular', note: 'No fue posible obtener referencias ASTM válidas para estos datos.' }; const vi = u <= h ? 100 + (Math.pow(10, Math.log10(h / u) / Math.log10(y)) - 1) / 0.00715 : 100 * (l - u) / (l - h); if (!Number.isFinite(vi)) return { value: 0, unit: 'VI', label: 'Datos no válidos para calcular', note: 'Revise las viscosidades ingresadas.' }; const boundedVi = Math.max(-100, Math.min(500, vi)); return { value: Math.round(boundedVi), unit: 'VI', label: 'Índice de viscosidad estimado', note: `ASTM D2270, Apéndice X2: U=${u.toFixed(2)} cSt a 40 °C, Y=${y.toFixed(2)} cSt a 100 °C; L=${l.toFixed(2)} y H=${h.toFixed(2)} cSt. Se aplicó la ecuación cuadrática continua del intervalo correspondiente y redondeo al entero más cercano.` } }
     case 'operational': { const v40 = Math.max(n('viscosity40'), 0.01); const v100 = Math.max(n('viscosity100'), 0.01); const target = n('operating'); const x1 = Math.log10(273 + 40); const x2 = Math.log10(273 + 100); const y1 = Math.log10(Math.log10(v40 + 0.7)); const y2 = Math.log10(Math.log10(v100 + 0.7)); const b = (y1 - y2) / (x2 - x1); const a = (b * x1) + y1; const yTarget = a - (b * Math.log10(273 + target)); const result = Math.max(0, Math.pow(10, Math.pow(10, yTarget)) - 0.7); return { value: Math.round(result * 100) / 100, unit: 'cSt', label: 'Viscosidad a temperatura de operación', note: 'Modelo ASTM D341 / Walther con viscosidades medidas a 40 °C y 100 °C. Para temperaturas fuera de ese rango, confirme con la curva del fabricante.' } }
-    case 'blend': { const ratio = Math.min(Math.max(n('ratio'), 0), 100) / 100; const oil1AtTarget = Math.max(n('oilA'), 0.1); const oil2AtTarget = Math.max(n('oilB'), 0.1); if (values.mode === 'target') { const target = Math.max(n('target'), 0.1); const blendLog = Math.log(target); const oil1Log = Math.log(oil1AtTarget); const oil2Log = Math.log(oil2AtTarget); const oil1Percent = Math.min(Math.max(((blendLog - oil2Log) / Math.max(oil1Log - oil2Log, 0.0001)) * 100, 0), 100); return { value: Math.round(oil1Percent * 10) / 10, unit: '% aceite 1', label: 'Porcentaje requerido del aceite 1', note: `Aceite 2: ${Math.round((100 - oil1Percent) * 10) / 10}% · Temperatura: ${values.temperature || '40'} °C.` } } return { value: Math.round(Math.exp(ratio * Math.log(oil1AtTarget) + (1 - ratio) * Math.log(oil2AtTarget)) * 10) / 10, unit: 'cSt', label: 'Viscosidad cinemática resultante', note: `Aceite 1: ${Math.round(ratio * 100 * 10) / 10}% · Aceite 2: ${Math.round((1 - ratio) * 100 * 10) / 10}% · Temperatura: ${values.temperature || '40'} °C.` } }
+    case 'blend': {
+      const nu1 = Number(values.oilA)
+      const nu2 = Number(values.oilB)
+      const temp = values.temperature || '40'
+      const batch = Number(values.batch)
+      const hasBatch = Number.isFinite(batch) && batch > 0
+      const isTarget = values.mode === 'target'
+      const errUnit = isTarget ? '% aceite 1' : 'cSt'
+      const disclaimer = 'Resultado estimado por cálculo; para producción o especificación final, confirme mediante mezcla física y ensayo de viscosidad. Mezclar viscosidades no certifica compatibilidad química ni equivalencia de prestaciones.'
+      // Solo viscosidades numéricas estrictamente mayores que cero.
+      if (!Number.isFinite(nu1) || !Number.isFinite(nu2) || nu1 <= 0 || nu2 <= 0) {
+        return { value: 0, unit: errUnit, label: 'Datos no válidos para calcular', note: 'Ingrese viscosidades numéricas estrictamente mayores que cero para ambos aceites, medidas a la misma temperatura.' }
+      }
+      const W1 = transformViscosity(nu1)
+      const W2 = transformViscosity(nu2)
+      if (!Number.isFinite(W1) || !Number.isFinite(W2)) {
+        return { value: 0, unit: errUnit, label: 'Fuera del rango del modelo', note: 'El método ASTM D7152 requiere viscosidades dentro de un rango físico válido (habitualmente ≥ 2 cSt). Revise los valores ingresados.' }
+      }
+      const volNote = (f1: number, f2: number) => hasBatch ? ` · Volumen aceite 1: ${(batch * f1).toFixed(2)} · aceite 2: ${(batch * f2).toFixed(2)} (mismas unidades del lote de ${batch}).` : ''
+      if (isTarget) {
+        const target = Number(values.target)
+        if (!Number.isFinite(target) || target <= 0) {
+          return { value: 0, unit: '% aceite 1', label: 'Datos no válidos para calcular', note: 'Ingrese una viscosidad objetivo numérica estrictamente mayor que cero.' }
+        }
+        const Wt = transformViscosity(target)
+        if (!Number.isFinite(Wt)) {
+          return { value: 0, unit: '% aceite 1', label: 'Fuera del rango del modelo', note: 'La viscosidad objetivo queda fuera del rango físico admitido por el método ASTM D7152.' }
+        }
+        // Viscosidades de ambos aceites iguales: sin solución única.
+        if (Math.abs(W1 - W2) < 1e-12) {
+          if (Math.abs(Wt - W1) < 1e-9) return { value: 0, unit: '% aceite 1', label: 'Sin solución única', note: `Ambos aceites tienen la misma viscosidad (${nu1} cSt) y coinciden con el objetivo: cualquier proporción produce el mismo resultado según el modelo ASTM D7152. No existe una receta única.` }
+          return { value: 0, unit: '% aceite 1', label: 'Objetivo no alcanzable', note: `Ambos aceites tienen la misma viscosidad (${nu1} cSt); no es posible alcanzar ${target} cSt combinándolos.` }
+        }
+        let f1 = (Wt - W2) / (W1 - W2)
+        // Tolerancia de punto flotante: redondear a 0 o 1 solo si está a menos de 1e-10.
+        if (f1 < 0 && f1 > -1e-10) f1 = 0
+        if (f1 > 1 && f1 < 1 + 1e-10) f1 = 1
+        if (f1 < 0 || f1 > 1) {
+          const lo = Math.min(nu1, nu2); const hi = Math.max(nu1, nu2)
+          return { value: 0, unit: '% aceite 1', label: 'Objetivo no alcanzable', note: `Con proporciones físicas (0–100%) la mezcla solo puede quedar entre ${lo} y ${hi} cSt. El objetivo de ${target} cSt queda fuera de ese intervalo; no se muestran porcentajes negativos ni superiores a 100%.` }
+        }
+        const f2 = 1 - f1
+        return {
+          value: Math.round(100 * f1 * 100) / 100,
+          unit: '% aceite 1',
+          label: 'Porcentaje requerido del aceite 1 (base volumen v/v)',
+          note: `Aceite 2: ${(100 * f2).toFixed(2)} %. Viscosidades a ${temp} °C.${volNote(f1, f2)} Ver cálculo (ASTM D7152-23): W₁=${W1.toFixed(4)}, W₂=${W2.toFixed(4)}, W_objetivo=${Wt.toFixed(4)}, f₁=${f1.toFixed(4)}, f₂=${f2.toFixed(4)}. ${disclaimer}`
+        }
+      }
+      // Modo viscosidad final: fracción del aceite 1 en 0-100 %.
+      const pct1 = Number(values.ratio)
+      if (!Number.isFinite(pct1) || pct1 < 0 || pct1 > 100) {
+        return { value: 0, unit: 'cSt', label: 'Datos no válidos para calcular', note: 'El porcentaje del aceite 1 debe ser un número entre 0 y 100 %.' }
+      }
+      const f1 = pct1 / 100
+      const f2 = 1 - f1
+      const Wmix = f1 * W1 + f2 * W2
+      const nuMix = inverseTransform(Wmix)
+      if (!Number.isFinite(nuMix) || nuMix <= 0) {
+        return { value: 0, unit: 'cSt', label: 'No fue posible calcular', note: 'La combinación de valores produjo un resultado no válido. Revise las viscosidades ingresadas.' }
+      }
+      return {
+        value: Math.round(nuMix * 100) / 100,
+        unit: 'cSt',
+        label: 'Viscosidad cinemática estimada de la mezcla (base volumen v/v)',
+        note: `Aceite 1: ${(100 * f1).toFixed(2)} % · Aceite 2: ${(100 * f2).toFixed(2)} %. Viscosidades a ${temp} °C.${volNote(f1, f2)} Ver cálculo (ASTM D7152-23): W₁=${W1.toFixed(4)}, W₂=${W2.toFixed(4)}, W_mezcla=${Wmix.toFixed(4)}. ${disclaimer}`
+      }
+    }
     case 'oilBath': { const lengthM = n('length') / 100; const widthM = n('width') / 100; const heightM = n('height') / 100; const fill = Math.min(Math.max(n('fill'), 0), 100); return { value: Math.round(lengthM * widthM * heightM * fill * 10) / 10, unit: 'L', label: 'Volumen recomendado de aceite', note: 'Dimensiones ingresadas en centímetros y convertidas internamente a metros. Considere nivel, expansión térmica y espacio libre del cárter.' } }
     case 'dripPoint': return { value: Math.round(n('drip') - n('operating') - n('safety')), unit: '°C', label: 'Margen térmico disponible', note: 'Mantenga un margen suficiente bajo el punto de goteo indicado por el fabricante.' }
     case 'api': { const input = n('value'); const inputUnit = values.unit || 'api'; const sg = inputUnit === 'api' ? 141.5 / Math.max(input + 131.5, 0.001) : inputUnit === 'lbgal' ? input / 8.345404 : input; const api = 141.5 / Math.max(sg, 0.001) - 131.5; const kgL = sg; const lbgal = sg * 8.345404; return { value: Math.round(api * 100) / 100, unit: '°API', label: 'Conversión a 15.6 °C (60 °F)', note: `Densidad: ${kgL.toFixed(4)} kg/L · Gravedad específica: ${sg.toFixed(4)} · Libras por galón: ${lbgal.toFixed(3)} lb/gal. ${api > 10 ? 'El producto es más liviano que el agua y tenderá a flotar.' : 'El producto es más pesado que el agua y tenderá a asentarse.'} Todos los valores se refieren a 60 °F (15.6 °C).` } }
@@ -126,7 +220,7 @@ function interpretResult(id: CalcId, value: number | string) {
   switch (id) {
     case 'vi': return numericValue >= 120 ? 'Según el objetivo de ASTM D2270, un VI ≥ 120 indica muy poca variación de viscosidad con la temperatura: excelente estabilidad térmica.' : numericValue >= 90 ? 'ASTM D2270 clasifica este rango como estabilidad térmica media-alta, adecuada para servicio industrial convencional.' : 'VI bajo según ASTM D2270: la viscosidad cae mucho al calentar. Revise el grado del lubricante y el rango térmico de operación.'
     case 'operational': return numericValue >= 15 ? 'La curva ASTM D341 proyecta una película robusta a esa temperatura; conserva capacidad de carga hidrodinámica.' : numericValue >= 5 ? 'La viscosidad proyectada por ASTM D341 es funcional; contraste con la viscosidad mínima que exige el rodamiento o engranaje.' : 'La viscosidad proyectada es baja para formar película bajo carga; considere un grado superior. Válido dentro del rango de ajuste 40–100 °C.'
-    case 'blend': return 'La regla logarítmica de mezcla (ASTM D7152) da la viscosidad esperada; confirme compatibilidad química y aditivación de ambos aceites antes de mezclar.'
+    case 'blend': return 'Estimación por el método ASTM D7152-23 (una sola temperatura) con transformación doble logarítmica; supone aceites compatibles con ambas viscosidades a la misma temperatura. La recomendación de compatibilidad de formulación es independiente del cálculo: mezclar viscosidades no certifica compatibilidad química ni equivalencia de prestaciones, aprobaciones o especificaciones de los productos originales. Confirme mediante mezcla física y ensayo de viscosidad.'
     case 'oilBath': return numericValue > 0 ? 'Volumen geométrico de referencia; mantenga el nivel del fabricante sin sobrellenar para permitir expansión térmica y disipación.' : 'El volumen calculado no es válido; revise las dimensiones ingresadas.'
     case 'dripPoint': return numericValue >= 25 ? 'El punto de goteo (ASTM D566/D2265) marca la pérdida de estructura de la grasa; este margen es cómodo para la operación indicada.' : numericValue >= 10 ? 'Margen reducido respecto al punto de goteo; controle la temperatura real y la condición de la grasa.' : 'Margen insuficiente frente al punto de goteo: seleccione una grasa con mayor estabilidad térmica (espesante de mayor punto de goteo).'
     case 'reducer': return `ISO VG ${numericValue}: selección preliminar por potencia específica y velocidad. Confirme temperatura del cárter, carga/torque, ambiente y compatibilidad con sellos; consulte AGMA 9005-F16 e ISO 12925-1 junto con el fabricante.`
@@ -371,7 +465,7 @@ function ViscosityPlot() {
 }
 
 function BlendFields({ mode, setMode, values, update }: { mode: 'ratio' | 'target'; setMode: (mode: 'ratio' | 'target') => void; values: Record<string, string>; update: (key: string, value: string) => void }) {
-  return <div className="blend-fields"><div className="blend-mode-tabs" role="tablist" aria-label="Modo de cálculo"><button type="button" className={mode === 'target' ? 'active' : ''} onClick={() => setMode('target')}>Porcentaje de mezcla</button><button type="button" className={mode === 'ratio' ? 'active' : ''} onClick={() => setMode('ratio')}>Viscosidad final</button></div><div className="fields-grid"><label>Viscosidad aceite 1<input inputMode="decimal" value={values.oilA || ''} onChange={(e) => update('oilA', e.target.value)} /><small>cSt a {values.temperature || '40'} °C</small></label><label>Viscosidad aceite 2<input inputMode="decimal" value={values.oilB || ''} onChange={(e) => update('oilB', e.target.value)} /><small>cSt a {values.temperature || '40'} °C</small></label>{mode === 'ratio' ? <label>Porcentaje del aceite 1<input inputMode="decimal" value={values.ratio || ''} onChange={(e) => update('ratio', e.target.value)} /><small>%</small></label> : <label>Viscosidad deseada<input inputMode="decimal" value={values.target || ''} onChange={(e) => update('target', e.target.value)} /><small>cSt</small></label>}<label>Temperatura<select value={values.temperature || '40'} onChange={(e) => update('temperature', e.target.value)}><option value="40">40 °C</option><option value="100">100 °C</option></select></label></div></div>
+  return <div className="blend-fields"><div className="blend-mode-tabs" role="tablist" aria-label="Modo de cálculo"><button type="button" role="tab" aria-selected={mode === 'target'} className={mode === 'target' ? 'active' : ''} onClick={() => setMode('target')}>Porcentaje de mezcla</button><button type="button" role="tab" aria-selected={mode === 'ratio'} className={mode === 'ratio' ? 'active' : ''} onClick={() => setMode('ratio')}>Viscosidad final</button></div><div className="fields-grid"><label>Viscosidad aceite 1<input inputMode="decimal" value={values.oilA || ''} onChange={(e) => update('oilA', e.target.value)} /><small>cSt a {values.temperature || '40'} °C</small></label><label>Viscosidad aceite 2<input inputMode="decimal" value={values.oilB || ''} onChange={(e) => update('oilB', e.target.value)} /><small>cSt a {values.temperature || '40'} °C</small></label>{mode === 'ratio' ? <label>Porcentaje del aceite 1<input inputMode="decimal" value={values.ratio || ''} onChange={(e) => update('ratio', e.target.value)} /><small>% v/v</small></label> : <label>Viscosidad deseada<input inputMode="decimal" value={values.target || ''} onChange={(e) => update('target', e.target.value)} /><small>cSt</small></label>}<label>Temperatura de referencia<input inputMode="decimal" value={values.temperature || ''} onChange={(e) => update('temperature', e.target.value)} placeholder="40" /><small>°C · ambas viscosidades a esta temperatura</small></label><label>Volumen total del lote<input inputMode="decimal" value={values.batch || ''} onChange={(e) => update('batch', e.target.value)} placeholder="Opcional" /><small>opcional · L u otra unidad</small></label></div><div className="blend-basis-note"><Info size={14} /><span>Base de fracción: volumen (% v/v). Método ASTM D7152-23 a una sola temperatura.</span></div></div>
 }
 
 function InputFields({ id, values, update }: { id: CalcId; values: Record<string, string>; update: (key: string, value: string) => void }) {
