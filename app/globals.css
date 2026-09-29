@@ -40,7 +40,7 @@ body { background:linear-gradient(135deg,#fdf0d5 0%,#fffaf0 58%,#f4dfc0 100%); }
 @media (max-width:420px) { .lubricant-row { padding:8px 7px; }.lubricant-fields { grid-template-columns:minmax(0,1.35fr) minmax(48px,.78fr) minmax(48px,.78fr); gap:5px; }.lubricant-fields label:not(:first-child) { font-size:7px; }.lubricant-fields input { padding-left:6px; padding-right:6px; font-size:10px; } }
 
 /* Reserve a dedicated column for the remove action so it never covers inputs. */
-.viscosity-layout { grid-template-columns:minmax(360px,38%) minmax(0,1fr); align-items:stretch; }.viscosity-chart-card { min-height:100%; display:flex; flex-direction:column; }.chart-wrap { flex:1 1 auto; min-height:360px; }.chart-legend { flex:0 0 auto; }
+.viscosity-layout { grid-template-columns:minmax(360px,38%) minmax(0,1fr); align-items:stretch; }.viscosity-chart-card { min-height:0; height:100%; display:flex; flex-direction:column; }.chart-wrap { flex:1 1 auto; min-height:0; height:auto; }.chart-legend { flex:0 0 auto; }
 .lubricant-row { display:grid; grid-template-columns:22px minmax(0,1fr) 34px; align-items:start; column-gap:8px; }.lubricant-fields { width:100%; min-width:0; }.remove-lubricant { width:28px; height:28px; margin:22px 0 0 auto; display:grid; place-items:center; position:relative; z-index:2; background:transparent; }
 @media (max-width:900px) { .viscosity-layout { grid-template-columns:minmax(0,1fr); } }
 @media (max-width:760px) { .lubricant-row { grid-template-columns:22px minmax(0,1fr) 34px; column-gap:8px; }.remove-lubricant { width:30px; height:30px; margin-top:22px; } }
