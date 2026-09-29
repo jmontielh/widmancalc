@@ -120,8 +120,6 @@ function calculate(id: CalcId, values: Record<string, string>) {
       const nu1 = Number(values.oilA)
       const nu2 = Number(values.oilB)
       const temp = values.temperature || '40'
-      const batch = Number(values.batch)
-      const hasBatch = Number.isFinite(batch) && batch > 0
       const isTarget = values.mode === 'target'
       const errUnit = isTarget ? '% aceite 1' : 'cSt'
       const disclaimer = 'Resultado estimado por cálculo; para producción o especificación final, confirme mediante mezcla física y ensayo de viscosidad. Mezclar viscosidades no certifica compatibilidad química ni equivalencia de prestaciones.'
@@ -134,7 +132,6 @@ function calculate(id: CalcId, values: Record<string, string>) {
       if (!Number.isFinite(W1) || !Number.isFinite(W2)) {
         return { value: 0, unit: errUnit, label: 'Fuera del rango del modelo', note: 'El método ASTM D7152 requiere viscosidades dentro de un rango físico válido (habitualmente ≥ 2 cSt). Revise los valores ingresados.' }
       }
-      const volNote = (f1: number, f2: number) => hasBatch ? ` · Volumen aceite 1: ${(batch * f1).toFixed(2)} · aceite 2: ${(batch * f2).toFixed(2)} (mismas unidades del lote de ${batch}).` : ''
       if (isTarget) {
         const target = Number(values.target)
         if (!Number.isFinite(target) || target <= 0) {
@@ -162,7 +159,7 @@ function calculate(id: CalcId, values: Record<string, string>) {
           value: Math.round(100 * f1 * 100) / 100,
           unit: '% aceite 1',
           label: 'Porcentaje requerido del aceite 1 (base volumen v/v)',
-          note: `Aceite 2: ${(100 * f2).toFixed(2)} %. Viscosidades a ${temp} °C.${volNote(f1, f2)} Ver cálculo (ASTM D7152-23): W₁=${W1.toFixed(4)}, W₂=${W2.toFixed(4)}, W_objetivo=${Wt.toFixed(4)}, f₁=${f1.toFixed(4)}, f₂=${f2.toFixed(4)}. ${disclaimer}`
+          note: `Aceite 2: ${(100 * f2).toFixed(2)} %. Viscosidades a ${temp} °C. Ver cálculo (ASTM D7152-23): W₁=${W1.toFixed(4)}, W₂=${W2.toFixed(4)}, W_objetivo=${Wt.toFixed(4)}, f₁=${f1.toFixed(4)}, f₂=${f2.toFixed(4)}. ${disclaimer}`
         }
       }
       // Modo viscosidad final: fracción del aceite 1 en 0-100 %.
@@ -181,7 +178,7 @@ function calculate(id: CalcId, values: Record<string, string>) {
         value: Math.round(nuMix * 100) / 100,
         unit: 'cSt',
         label: 'Viscosidad cinemática estimada de la mezcla (base volumen v/v)',
-        note: `Aceite 1: ${(100 * f1).toFixed(2)} % · Aceite 2: ${(100 * f2).toFixed(2)} %. Viscosidades a ${temp} °C.${volNote(f1, f2)} Ver cálculo (ASTM D7152-23): W₁=${W1.toFixed(4)}, W₂=${W2.toFixed(4)}, W_mezcla=${Wmix.toFixed(4)}. ${disclaimer}`
+        note: `Aceite 1: ${(100 * f1).toFixed(2)} % · Aceite 2: ${(100 * f2).toFixed(2)} %. Viscosidades a ${temp} °C. Ver cálculo (ASTM D7152-23): W₁=${W1.toFixed(4)}, W₂=${W2.toFixed(4)}, W_mezcla=${Wmix.toFixed(4)}. ${disclaimer}`
       }
     }
     case 'oilBath': { const lengthM = n('length') / 100; const widthM = n('width') / 100; const heightM = n('height') / 100; const fill = Math.min(Math.max(n('fill'), 0), 100); return { value: Math.round(lengthM * widthM * heightM * fill * 10) / 10, unit: 'L', label: 'Volumen recomendado de aceite', note: 'Dimensiones ingresadas en centímetros y convertidas internamente a metros. Considere nivel, expansión térmica y espacio libre del cárter.' } }
@@ -465,7 +462,7 @@ function ViscosityPlot() {
 }
 
 function BlendFields({ mode, setMode, values, update }: { mode: 'ratio' | 'target'; setMode: (mode: 'ratio' | 'target') => void; values: Record<string, string>; update: (key: string, value: string) => void }) {
-  return <div className="blend-fields"><div className="blend-mode-tabs" role="tablist" aria-label="Modo de cálculo"><button type="button" role="tab" aria-selected={mode === 'target'} className={mode === 'target' ? 'active' : ''} onClick={() => setMode('target')}>Porcentaje de mezcla</button><button type="button" role="tab" aria-selected={mode === 'ratio'} className={mode === 'ratio' ? 'active' : ''} onClick={() => setMode('ratio')}>Viscosidad final</button></div><div className="fields-grid"><label>Viscosidad aceite 1<input inputMode="decimal" value={values.oilA || ''} onChange={(e) => update('oilA', e.target.value)} /><small>cSt a {values.temperature || '40'} °C</small></label><label>Viscosidad aceite 2<input inputMode="decimal" value={values.oilB || ''} onChange={(e) => update('oilB', e.target.value)} /><small>cSt a {values.temperature || '40'} °C</small></label>{mode === 'ratio' ? <label>Porcentaje del aceite 1<input inputMode="decimal" value={values.ratio || ''} onChange={(e) => update('ratio', e.target.value)} /><small>% v/v</small></label> : <label>Viscosidad deseada<input inputMode="decimal" value={values.target || ''} onChange={(e) => update('target', e.target.value)} /><small>cSt</small></label>}<label>Temperatura de referencia<input inputMode="decimal" value={values.temperature || ''} onChange={(e) => update('temperature', e.target.value)} placeholder="40" /><small>°C · ambas viscosidades a esta temperatura</small></label><label>Volumen total del lote<input inputMode="decimal" value={values.batch || ''} onChange={(e) => update('batch', e.target.value)} placeholder="Opcional" /><small>opcional · L u otra unidad</small></label></div><div className="blend-basis-note"><Info size={14} /><span>Base de fracción: volumen (% v/v). Método ASTM D7152-23 a una sola temperatura.</span></div></div>
+  return <div className="blend-fields"><div className="blend-mode-tabs" role="tablist" aria-label="Modo de cálculo"><button type="button" role="tab" aria-selected={mode === 'target'} className={mode === 'target' ? 'active' : ''} onClick={() => setMode('target')}>Porcentaje de mezcla</button><button type="button" role="tab" aria-selected={mode === 'ratio'} className={mode === 'ratio' ? 'active' : ''} onClick={() => setMode('ratio')}>Viscosidad final</button></div><div className="fields-grid"><label>Viscosidad aceite 1<input inputMode="decimal" value={values.oilA || ''} onChange={(e) => update('oilA', e.target.value)} /><small>cSt a {values.temperature || '40'} °C</small></label><label>Viscosidad aceite 2<input inputMode="decimal" value={values.oilB || ''} onChange={(e) => update('oilB', e.target.value)} /><small>cSt a {values.temperature || '40'} °C</small></label>{mode === 'ratio' ? <label>Porcentaje del aceite 1<input inputMode="decimal" value={values.ratio || ''} onChange={(e) => update('ratio', e.target.value)} /><small>% v/v</small></label> : <label>Viscosidad deseada<input inputMode="decimal" value={values.target || ''} onChange={(e) => update('target', e.target.value)} /><small>cSt</small></label>}<label>Temperatura de referencia<input inputMode="decimal" value={values.temperature || ''} onChange={(e) => update('temperature', e.target.value)} placeholder="40" /><small>°C · ambas viscosidades a esta temperatura</small></label></div></div>
 }
 
 function InputFields({ id, values, update }: { id: CalcId; values: Record<string, string>; update: (key: string, value: string) => void }) {
