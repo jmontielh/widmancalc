@@ -40,10 +40,10 @@ body { background:linear-gradient(135deg,#fdf0d5 0%,#fffaf0 58%,#f4dfc0 100%); }
 @media (max-width:420px) { .lubricant-row { padding:8px 7px; }.lubricant-fields { gap:6px; }.lubricant-fields input { padding-left:7px; padding-right:7px; font-size:11px; } }
 
 /* Reserve a dedicated column for the remove action so it never covers inputs. */
-.viscosity-layout { grid-template-columns:minmax(360px,38%) minmax(0,1fr); }.lubricant-row { display:grid; grid-template-columns:22px minmax(0,1fr) 28px; align-items:start; }.lubricant-fields { width:100%; }.remove-lubricant { width:28px; height:28px; margin:22px 0 0 auto; display:grid; place-items:center; }
+.viscosity-layout { grid-template-columns:minmax(360px,38%) minmax(0,1fr); }.lubricant-row { display:grid; grid-template-columns:22px minmax(0,1fr) 34px; align-items:start; column-gap:8px; }.lubricant-fields { width:100%; min-width:0; }.remove-lubricant { width:28px; height:28px; margin:22px 0 0 auto; display:grid; place-items:center; position:relative; z-index:2; background:transparent; }
 @media (max-width:900px) { .viscosity-layout { grid-template-columns:minmax(0,1fr); } }
-@media (max-width:760px) { .lubricant-row { grid-template-columns:22px minmax(0,1fr) 30px; }.remove-lubricant { width:30px; height:30px; margin-top:22px; } }
-@media (max-width:420px) { .lubricant-row { grid-template-columns:20px minmax(0,1fr) 28px; gap:6px; }.remove-lubricant { width:28px; height:28px; } }
+@media (max-width:760px) { .lubricant-row { grid-template-columns:22px minmax(0,1fr) 34px; column-gap:8px; }.remove-lubricant { width:30px; height:30px; margin-top:22px; } }
+@media (max-width:420px) { .lubricant-row { grid-template-columns:20px minmax(0,1fr) 32px; column-gap:7px; }.remove-lubricant { width:28px; height:28px; } }
 
 /* LubriCalc playful precision system */
 :root { --background:#fff9f0; --foreground:#263247; --card:#ffffff; --card-foreground:#263247; --primary:#4055a6; --primary-foreground:#ffffff; --border:#e8dfd2; --muted-foreground:#7b8192; --navy:#28345f; --teal:#27a69a; --amber:#f3a93d; --soft:#fff0d8; }
