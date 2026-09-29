@@ -45,6 +45,11 @@ body { background:linear-gradient(135deg,#fdf0d5 0%,#fffaf0 58%,#f4dfc0 100%); }
 @media (max-width:760px) { .lubricant-row { grid-template-columns:22px minmax(0,1fr) 34px; column-gap:8px; }.remove-lubricant { width:30px; height:30px; margin-top:22px; } }
 @media (max-width:420px) { .lubricant-row { grid-template-columns:20px minmax(0,1fr) 32px; column-gap:7px; }.remove-lubricant { width:28px; height:28px; } }
 
+/* The delete control stays outside the fields and centers against their input line. */
+.lubricant-row { box-sizing:border-box; width:100%; }.lubricant-fields { box-sizing:border-box; }.remove-lubricant { align-self:center; margin:0 0 0 auto; }
+@media (max-width:760px) { .lubricant-row { grid-template-columns:20px minmax(0,1fr) 36px; column-gap:8px; }.remove-lubricant { align-self:center; margin:0 0 0 auto; } }
+@media (max-width:420px) { .lubricant-row { grid-template-columns:18px minmax(0,1fr) 34px; column-gap:7px; }.remove-lubricant { width:28px; height:28px; } }
+
 /* LubriCalc playful precision system */
 :root { --background:#fff9f0; --foreground:#263247; --card:#ffffff; --card-foreground:#263247; --primary:#4055a6; --primary-foreground:#ffffff; --border:#e8dfd2; --muted-foreground:#7b8192; --navy:#28345f; --teal:#27a69a; --amber:#f3a93d; --soft:#fff0d8; }
 body { background:radial-gradient(circle at 86% 4%, #ffe7bd 0 7%, transparent 25%), var(--background); }
