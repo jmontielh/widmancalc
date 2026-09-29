@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
+import Fuse from 'fuse.js'
 import {
   Activity, ArrowRight, BookOpen, Calculator, Check, ChevronDown, Clock3,
   Droplets, Gauge, Info, Menu, Search, Settings2, ShieldCheck,
@@ -134,7 +135,7 @@ function interpretResult(id: CalcId, value: number | string) {
     case 'greaseLife': return numericValue >= 10000 ? 'Vida F10 amplia según el modelo SKF/DIN 51825 para las condiciones ingresadas.' : numericValue >= 3000 ? 'Vida intermedia (modelo SKF/DIN 51825); programe inspecciones periódicas de condición.' : 'Vida corta según el modelo SKF/DIN 51825; considere relubricación frecuente o ajuste de velocidad y temperatura.'
     case 'relube': return numericValue >= 2000 ? 'Intervalo amplio según el modelo SKF/ISO 15257; mantenga inspecciones de condición.' : 'El modelo SKF/ISO 15257 sugiere una ruta frecuente; ajuste por contaminación, agua o vibración.'
     case 'hydraulic': return numericValue <= 15 ? 'Potencia hidráulica moderada (P = Q·p/η, ISO 4413) para el caudal indicado.' : 'Potencia significativa (P = Q·p/η, ISO 4413); revise eficiencia, pérdidas y capacidad del motor.'
-    case 'pressureLoss': return numericValue <= 1 ? 'Pérdida baja por el modelo Darcy–Weisbach; favorable para la eficiencia de la línea.' : 'Pérdida relevante (Darcy–Weisbach); revise diámetro, longitud, accesorios y viscosidad del fluido.'
+    case 'pressureLoss': return numericValue <= 1 ? 'Pérdida baja por el modelo Darcy��Weisbach; favorable para la eficiencia de la línea.' : 'Pérdida relevante (Darcy–Weisbach); revise diámetro, longitud, accesorios y viscosidad del fluido.'
     case 'oilTemp': return numericValue <= 55 ? 'Temperatura dentro de un rango favorable para la vida del aceite (la oxidación se duplica cada ~10 °C sobre 60 °C).' : numericValue <= 75 ? 'Temperatura elevada; verifique enfriamiento y que la viscosidad a esa temperatura siga siendo adecuada.' : 'Temperatura crítica: acelera la oxidación del aceite; revise disipación, enfriador y condición del fluido.'
     case 'airLube': return 'Dosis proporcional al consumo de aire; ajuste el lubricador gradualmente y confirme la niebla en el punto de consumo.'
     case 'dewPoint': return numericValue >= 10 ? 'Margen favorable frente al punto de rocío (ISO 8573-1) a la presión indicada: bajo riesgo de condensado.' : numericValue >= 3 ? 'Margen reducido frente al punto de rocío (ISO 8573-1); revise secador, presión y aislamiento de la red.' : 'Alto riesgo de condensación (ISO 8573-1); reduzca humedad o temperatura y revise el tratamiento de aire.'
@@ -191,10 +192,15 @@ export default function Page() {
   const selected = calculators.find((calc) => calc.id === active) || calculators[0]
   const result = calculate(active, values)
   const interpretation = interpretResult(active, result.value)
+  const fuse = useMemo(() => new Fuse(calculators, { keys: ['title', 'category', 'description', 'metric'], threshold: 0.4, ignoreLocation: true }), [])
   const filtered = useMemo(() => {
-    const list = calculators.filter((calc) => (category === 'Todas' || calc.category === category) && `${calc.title} ${calc.description}`.toLowerCase().includes(query.toLowerCase()))
+    const byCategory = calculators.filter((calc) => category === 'Todas' || calc.category === category)
+    const trimmed = query.trim()
+    const list = trimmed
+      ? fuse.search(trimmed).map((match) => match.item).filter((calc) => category === 'Todas' || calc.category === category)
+      : byCategory
     return [...list].sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id))
-  }, [category, query, order])
+  }, [category, query, order, fuse])
 
   function openCalculator(id: CalcId) { setActive(id); setValues(id === 'blend' ? { ...defaults[id], mode: blendMode } : { ...defaults[id] }); setHistory((prev) => [id, ...prev.filter((item) => item !== id)].slice(0, 5)); setIsCalculatorOpen(true) }
   function blankValues(id: CalcId) { return Object.fromEntries(Object.keys(defaults[id]).map((key) => [key, ''])) }
