@@ -33,6 +33,12 @@ body { background:linear-gradient(135deg,#fdf0d5 0%,#fffaf0 58%,#f4dfc0 100%); }
 @media (max-width:900px) { .viscosity-layout { grid-template-columns:1fr; }.viscosity-controls { order:2; }.viscosity-chart-card { order:1; } }
 @media (max-width:760px) { .viscosity-tool { padding:18px 14px; margin-left:-4px; margin-right:-4px; }.viscosity-head { flex-direction:column; gap:12px; }.plot-settings { grid-template-columns:1fr 1fr; }.plot-settings label:last-child { grid-column:span 2; }.chart-wrap { height:260px; }.lubricant-fields { grid-template-columns:1fr 1fr; }.lubricant-fields label:first-child { grid-column:span 2; } }
 
+/* Keep lubricant names readable beside the remove action. */
+.lubricant-row { min-width:0; }.lubricant-fields { min-width:0; grid-template-columns:minmax(112px,1.6fr) minmax(70px,1fr) minmax(70px,1fr); }.lubricant-fields label { min-width:0; }.lubricant-fields input { min-width:0; font-size:11px; }.remove-lubricant { flex:0 0 24px; }
+@media (max-width:900px) and (min-width:761px) { .viscosity-controls { padding:14px 12px; }.lubricant-row { gap:6px; padding:8px; }.lubricant-fields { grid-template-columns:minmax(105px,1.5fr) minmax(64px,1fr) minmax(64px,1fr); gap:5px; } }
+@media (max-width:760px) { .lubricant-row { gap:8px; }.lubricant-fields { grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; }.lubricant-fields label:first-child { grid-column:1 / -1; }.lubricant-fields input { font-size:12px; }.remove-lubricant { margin-top:22px; } }
+@media (max-width:420px) { .lubricant-row { padding:8px 7px; }.lubricant-fields { gap:6px; }.lubricant-fields input { padding-left:7px; padding-right:7px; font-size:11px; } }
+
 /* LubriCalc playful precision system */
 :root { --background:#fff9f0; --foreground:#263247; --card:#ffffff; --card-foreground:#263247; --primary:#4055a6; --primary-foreground:#ffffff; --border:#e8dfd2; --muted-foreground:#7b8192; --navy:#28345f; --teal:#27a69a; --amber:#f3a93d; --soft:#fff0d8; }
 body { background:radial-gradient(circle at 86% 4%, #ffe7bd 0 7%, transparent 25%), var(--background); }
